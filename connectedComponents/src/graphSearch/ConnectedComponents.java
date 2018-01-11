@@ -14,14 +14,14 @@ public class ConnectedComponents {
     private Graph<ImageMatrixCell, ?> biggestComponent;
     private ArrayList<Graph<ImageMatrixCell, ?>> allComponents;
 
-    public ConnectedComponents(Mat mat) {
-        this.allComponents = findConnectedComponents(mat);
+    public ConnectedComponents(Mat mat, boolean colorsInverted) {
+        this.allComponents = findConnectedComponents(mat, colorsInverted);
         this.biggestComponent = getBiggestComponent(this.allComponents);
     }
 
-    public ArrayList<Graph<ImageMatrixCell, ?>> findConnectedComponents(Mat mat) {
+    public ArrayList<Graph<ImageMatrixCell, ?>> findConnectedComponents(Mat mat, boolean colorsInverted) {
         Graph<ImageMatrixCell, Integer> matGraph = new Graph<>();
-        createVertices(mat, matGraph);
+        createVertices(mat, matGraph, colorsInverted);
         List<Vertex<ImageMatrixCell>> vertexList = new ArrayList<>(matGraph.getVertexList());
         
       //  System.out.println("vertex list size : "+vertexList.size());
@@ -91,7 +91,7 @@ public class ConnectedComponents {
     }
 
     private boolean isBlack(Vertex<ImageMatrixCell> aConnectedVertex) {
-        if (aConnectedVertex.getState().getImageState()[0] == 0 ) {
+        if (aConnectedVertex.getState().getImageState()[0] == 0) {
             return true;
         }
         return false;
@@ -110,20 +110,30 @@ public class ConnectedComponents {
         return result;
     }
 
-    private void createVertices(Mat mat, Graph<ImageMatrixCell, Integer> matGraph) {
+    private void createVertices(Mat mat, Graph<ImageMatrixCell, Integer> matGraph, boolean colorsInverted) {
     	
         for (int i = 0; i < mat.size().height; i++) {
             for (int j = 0; j < mat.size().width; j++) {
                 ImageMatrixCell cellState = new ImageMatrixCell(mat.get(i, j), j, i);
                // System.out.println(mat.get(i, j)[0]+" i: "+i+" j: "+j);	
-                if(mat.get(i, j)[0]!=0){
+                if(addToGraph(mat, i, j, colorsInverted)){
                 		matGraph.addVertex(cellState, "" + i +"-"+ j);
-                	}
+                }
             }
         }
     }
 
-    public Graph<ImageMatrixCell, ?> getBiggestComponent(){
+    private boolean addToGraph(Mat mat, int i, int j, boolean colorsInverted) {
+		if(mat.get(i, j)[0]!=0 && !colorsInverted) {
+			return true;
+		} 
+		if(mat.get(i, j)[0]==0 && colorsInverted) { 
+			return true;
+		}
+		return false;
+	}
+
+	public Graph<ImageMatrixCell, ?> getBiggestComponent(){
         return this.biggestComponent;
     }
 
